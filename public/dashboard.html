@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Pee Cleaning</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Segoe UI', Roboto, sans-serif;
+    }
+    body {
+      background: #f5f0eb;
+      color: #1d2b3a;
+      padding: 1.5rem;
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+    .header {
+      background: white;
+      padding: 1.5rem 2rem;
+      border-radius: 30px;
+      margin-bottom: 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+    .header h1 {
+      font-weight: 300;
+      font-size: 1.8rem;
+    }
+    .header h1 i {
+      color: #2f4b3c;
+      margin-right: 10px;
+    }
+    .header .back-link {
+      color: #1d2b3a;
+      text-decoration: none;
+      font-weight: 500;
+    }
+    .header .back-link i {
+      margin-right: 6px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .stat-card {
+      background: white;
+      border-radius: 28px;
+      padding: 1.5rem;
+      border: 1px solid #ede7e0;
+    }
+    .stat-card .num {
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #2f4b3c;
+    }
+    .stat-card .label {
+      font-size: 0.9rem;
+      opacity: 0.7;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 40px;
+      padding: 2rem;
+      border: 1px solid #ede7e0;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .panel-header h2 {
+      font-weight: 400;
+      font-size: 1.5rem;
+    }
+    .panel-header .filters {
+      display: flex;
+      gap: 0.8rem;
+      flex-wrap: wrap;
+    }
+    .panel-header select {
+      padding: 0.5rem 1rem;
+      border: 1px solid #ddd6ce;
+      border-radius: 40px;
+      background: #faf8f6;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th {
+      text-align: left;
+      padding: 0.8rem 0.6rem;
+      font-weight: 600;
+      color: #3f3f3f;
+      border-bottom: 2px solid #ede7e0;
+    }
+    td {
+      padding: 0.8rem 0.6rem;
+      border-bottom: 1px solid #f5f0eb;
+      vertical-align: middle;
+    }
+    tr:hover {
+      background: #faf8f6;
+    }
+
+    .badge {
+      padding: 0.2rem 1rem;
+      border-radius: 30px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: inline-block;
+    }
+    .badge.new { background: #d4e3d9; color: #1d4b3a; }
+    .badge.confirmed { background: #d4d9e3; color: #1d2b4a; }
+    .badge.quote { background: #e8d5c4; color: #5a3f2e; }
+    .badge.completed { background: #d9d9d9; color: #4a4a4a; }
+
+    .status-select {
+      padding: 0.3rem 0.6rem;
+      border: 1px solid #ddd6ce;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      background: white;
+      cursor: pointer;
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: #a08474;
+      cursor: pointer;
+      font-size: 1.1rem;
+      transition: 0.1s;
+    }
+    .delete-btn:hover {
+      color: #b13e3e;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 3rem 0;
+      color: #6f6f6f;
+    }
+    .empty-state i {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .refresh-btn {
+      background: #f3ede7;
+      border: none;
+      padding: 0.5rem 1.5rem;
+      border-radius: 40px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: 0.2s;
+    }
+    .refresh-btn:hover {
+      background: #e7d9ce;
+    }
+
+    @media (max-width: 768px) {
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1><i class="fas fa-tachometer-alt"></i> Booking Dashboard</h1>
+    <div>
+      <a href="/" class="back-link"><i class="fas fa-arrow-left"></i> Back to Website</a>
+    </div>
+  </div>
+
+  <div class="stats" id="statsContainer">
+    <div class="stat-card">
+      <div class="num" id="totalCount">0</div>
+      <div class="label">Total Bookings</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="newCount">0</div>
+      <div class="label">New</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="quoteCount">0</div>
+      <div class="label">Quotes</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="confirmedCount">0</div>
+      <div class="label">Confirmed</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-header">
+      <h2><i class="fas fa-list-ul"></i> All Bookings</h2>
+      <div class="filters">
+        <select id="statusFilter">
+          <option value="all">All Status</option>
+          <option value="new">New</option>
+          <option value="quote">Quote</option>
+          <option value="confirmed">Confirmed</option>
+          <option value="completed">Completed</option>
+        </select>
+        <button class="refresh-btn" onclick="loadBookings()">
+          <i class="fas fa-sync-alt"></i> Refresh
+        </button>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Client</th>
+            <th>Service</th>
+            <th>Date</th>
+            <th>Source</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="bookingsBody">
+          <tr>
+            <td colspan="7" class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No bookings yet</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  async function loadBookings() {
+    try {
+      console.log('📊 Loading bookings...');
+      const response = await fetch(`${API_URL}/bookings`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log('📊 Bookings loaded:', data);
+      
+      if (data.success) {
+        renderBookings(data.bookings || []);
+        updateStats(data.bookings || []);
+      } else {
+        console.error('Failed to load bookings:', data.error);
+      }
+    } catch (error) {
+      console.error('Error loading bookings:', error);
+      document.getElementById('bookingsBody').innerHTML = `
+        <tr>
+          <td colspan="7" class="empty-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>Error loading bookings. Make sure the server is running.</p>
+            <p style="font-size:0.8rem; opacity:0.6;">${error.message}</p>
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  function renderBookings(bookings) {
+    const tbody = document.getElementById('bookingsBody');
+    const filter = document.getElementById('statusFilter').value;
+    
+    const filtered = filter === 'all' ? bookings : bookings.filter(b => b.status === filter);
+
+    if (filtered.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <p>No bookings found</p>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = filtered.map(b => `
+      <tr>
+        <td>#${b.id}</td>
+        <td>
+          <strong>${escapeHtml(b.name)}</strong><br>
+          <span style="font-size:0.75rem; opacity:0.6;">${escapeHtml(b.phone)}</span>
+        </td>
+        <td>${escapeHtml(b.service)}</td>
+        <td>${b.date}</td>
+        <td><span class="badge ${b.source === 'website' ? 'quote' : 'confirmed'}">${b.source || 'website'}</span></td>
+        <td>
+          <select class="status-select" data-id="${b.id}" onchange="updateStatus(${b.id}, this.value)">
+            <option value="new" ${b.status === 'new' ? 'selected' : ''}>New</option>
+            <option value="quote" ${b.status === 'quote' ? 'selected' : ''}>Quote</option>
+            <option value="confirmed" ${b.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+            <option value="completed" ${b.status === 'completed' ? 'selected' : ''}>Completed</option>
+          </select>
+        </td>
+        <td>
+          <button class="delete-btn" onclick="deleteBooking(${b.id})" title="Delete">
+            <i class="fas fa-trash-alt"></i>
+          </button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  function updateStats(bookings) {
+    const total = bookings.length;
+    const newCount = bookings.filter(b => b.status === 'new').length;
+    const quoteCount = bookings.filter(b => b.status === 'quote').length;
+    const confirmedCount = bookings.filter(b => b.status === 'confirmed' || b.status === 'completed').length;
+    
+    document.getElementById('totalCount').textContent = total;
+    document.getElementById('newCount').textContent = newCount;
+    document.getElementById('quoteCount').textContent = quoteCount;
+    document.getElementById('confirmedCount').textContent = confirmedCount;
+  }
+
+  async function updateStatus(id, status) {
+    try {
+      const response = await fetch(`${API_URL}/bookings/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        loadBookings();
+      } else {
+        alert('Failed to update status: ' + (data.error || 'Unknown error'));
+        loadBookings();
+      }
+    } catch (error) {
+      console.error('Error updating status:', error);
+      alert('Network error. Please try again.');
+      loadBookings();
+    }
+  }
+
+  async function deleteBooking(id) {
+    if (!confirm('Delete this booking?')) return;
+    
+    try {
+      const response = await fetch(`${API_URL}/bookings/${id}`, {
+        method: 'DELETE'
+      });
+      
+      const data = await response.json();
+      if (data.success) {
+        loadBookings();
+      } else {
+        alert('Failed to delete booking: ' + (data.error || 'Unknown error'));
+      }
+    } catch (error) {
+      console.error('Error deleting booking:', error);
+      alert('Network error. Please try again.');
+    }
+  }
+
+  function escapeHtml(text) {
+    if (!text) return '';
+    return String(text).replace(/[&<>"]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      if (m === '"') return '&quot;';
+      return m;
+    });
+  }
+
+  // Load on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    loadBookings();
+  });
+  
+  // Filter change
+  document.getElementById('statusFilter').addEventListener('change', loadBookings);
+</script>
+  </body>
+</html>
+  
