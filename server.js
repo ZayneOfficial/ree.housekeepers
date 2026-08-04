@@ -220,9 +220,7 @@ app.use((req, res) => {
 });
 
 // ===== START SERVER =====
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🚀 Server running on http://localhost:${PORT}`);
-  console.log(`📋 Quote Form: http://localhost:${PORT}/`);
-  console.log(`📊 Dashboard: http://localhost:${PORT}/dashboard`);
-  console.log(`📝 Test API: http://localhost:${PORT}/api/test\n`);
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
 });
